@@ -1,0 +1,24 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    unzip \
+    git \
+    graphviz \
+    openjdk-17-jdk \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Nextflow
+RUN curl -s https://get.nextflow.io | bash && \
+    mv nextflow /usr/local/bin/ && \
+    chmod +x /usr/local/bin/nextflow
+
+# Create non-root user for VS Code
+RUN useradd -ms /bin/bash devuser
+
+USER devuser
+WORKDIR /workspace

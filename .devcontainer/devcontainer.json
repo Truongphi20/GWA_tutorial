@@ -1,0 +1,15 @@
+{
+  "name": "Nextflow Dev Environment",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "nextflow.nextflow",
+        "ms-azuretools.vscode-docker"
+      ]
+    }
+  },
+  "remoteUser": "devuser"
+}
