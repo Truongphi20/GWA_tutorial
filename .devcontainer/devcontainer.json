@@ -14,5 +14,10 @@
   "mounts": [
     "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
   ],
+  "containerEnv": {
+    "HOST_WORKDIR": "${localWorkspaceFolder}"
+  },
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+  "workspaceFolder": "/workspace",
   "remoteUser": "devuser"
 }
