@@ -1,1 +1,4 @@
 work/
+.nextflow.log*
+.nextflow
+output/
