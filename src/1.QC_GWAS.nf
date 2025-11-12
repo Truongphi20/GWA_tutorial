@@ -88,6 +88,24 @@ process CHECK_SEX_DISCREPANCY {
     """
 }
 
+process SEX_DISCREPANCY_VISUALIZE {
+    container "rocker/r-base:4.5.2"
+
+    input:
+    path sex_check
+    path visualize_script
+
+    output:
+    path("Gender_check.pdf"), emit: gender
+    path("Men_check.pdf"), emit: men
+    path("Women_check.pdf"), emit: women
+
+    script:
+    """
+    Rscript --no-save $visualize_script
+    """
+}
+
 
 
 workflow QC_GWAS {
@@ -109,5 +127,11 @@ workflow QC_GWAS {
 
     // Step 2: Check sex discrepancy
     CHECK_SEX_DISCREPANCY(FILTERING_MISSINGNESS.out.second_filter_individual)
+
+    visualize_sex_script = channel.fromPath("${projectDir}/1_QC_GWAS/gender_check.R")
+    SEX_DISCREPANCY_VISUALIZE(
+        CHECK_SEX_DISCREPANCY.out,
+        visualize_sex_script
+    )
 
 }
