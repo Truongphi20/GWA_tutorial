@@ -106,6 +106,44 @@ process SEX_DISCREPANCY_VISUALIZE {
     """
 }
 
+process SEX_DISCREPANCY_HANDLE_BY_REMOVE {
+    container "biocontainers/plink:v1.07dfsg-2-deb_cv1"
+
+    input:
+    path sex_check
+    path filter_missing_output
+
+    output:
+    path("HapMap_3_r3_6.{bed,bim,fam}")
+
+    script:
+    """
+    grep "PROBLEM" $sex_check| awk '{print\$1,\$2}'> sex_discrepancy.txt
+    /usr/lib/debian-med/bin/plink --bfile HapMap_3_r3_5  \\
+                                  --remove sex_discrepancy.txt \\
+                                  --make-bed \\
+                                  --out HapMap_3_r3_6 
+    """
+}
+
+process SEX_DISCREPANCY_HANDLE_BY_IMPUTE {
+    container "biocontainers/plink:v1.07dfsg-2-deb_cv1"
+
+    input:
+    path filter_missing_output
+
+    output:
+    path("HapMap_3_r3_6.{bed,bim,fam}")
+
+    script:
+    """
+    /usr/lib/debian-med/bin/plink --bfile HapMap_3_r3_5 \\
+                                    --impute-sex \\
+                                    --make-bed \\
+                                    --out HapMap_3_r3_6
+    """
+}
+
 
 
 workflow QC_GWAS {
@@ -132,6 +170,15 @@ workflow QC_GWAS {
     SEX_DISCREPANCY_VISUALIZE(
         CHECK_SEX_DISCREPANCY.out,
         visualize_sex_script
+    )
+
+    SEX_DISCREPANCY_HANDLE_BY_REMOVE(
+        CHECK_SEX_DISCREPANCY.out,
+        FILTERING_MISSINGNESS.out.second_filter_individual
+    )
+
+    SEX_DISCREPANCY_HANDLE_BY_IMPUTE(
+        FILTERING_MISSINGNESS.out.second_filter_individual
     )
 
 }
