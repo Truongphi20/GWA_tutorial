@@ -204,6 +204,35 @@ process MAF_FILTERING {
     """
 }
 
+process HWE_CHECKING {
+    container "biocontainers/plink:v1.07dfsg-2-deb_cv1"
+
+    input:
+    path maf_filering_output
+
+    output:
+    path("plink.hwe")
+
+    script:
+    """
+    /usr/lib/debian-med/bin/plink --bfile HapMap_3_r3_8 --hardy
+    """
+}
+
+process HWE_CHECKING_PLOT {
+    container "rocker/r-base:4.5.2"
+
+    input:
+    path hwe_check_output
+    path hwe_plot_script
+
+    script:
+    """
+    awk '{ if (\$9 <0.00001) print \$0 }' plink.hwe>plinkzoomhwe.hwe
+    Rscript --no-save $hwe_plot_script
+    """
+}
+
 
 
 workflow QC_GWAS {
@@ -252,4 +281,13 @@ workflow QC_GWAS {
     )
     
     MAF_FILTERING(MAF_AUTOSOMAL_SELECTION.out.plink_files)
+
+    // Step 4: Filtering by Hardy-Weinberg equilibrium (HWE)
+    HWE_CHECKING(MAF_FILTERING.out)
+
+    hwe_plot_script = channel.fromPath("${projectDir}/1_QC_GWAS/hwe.R")
+    HWE_CHECKING_PLOT(
+        HWE_CHECKING.out,
+        hwe_plot_script 
+    )
 }
