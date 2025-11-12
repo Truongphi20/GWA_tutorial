@@ -33,7 +33,7 @@ process VISUALIZE_MISSINGNESS {
     """
 }
 
-process FILTERING {
+process FILTERING_MISSINGNESS {
     container "biocontainers/plink:v1.07dfsg-2-deb_cv1"
 
     input:
@@ -73,6 +73,21 @@ process FILTERING {
     """
 }
 
+process CHECK_SEX_DISCREPANCY {
+    container "biocontainers/plink:v1.07dfsg-2-deb_cv1"
+
+    input:
+    path filter_missing_output
+
+    output:
+    path("plink.sexcheck")
+
+    script:
+    """
+    /usr/lib/debian-med/bin/plink --bfile HapMap_3_r3_5 --check-sex
+    """
+}
+
 
 
 workflow QC_GWAS {
@@ -89,8 +104,10 @@ workflow QC_GWAS {
         visualize_missing_script
     )
 
-    // Filtering
-    FILTERING(input_files_ch)
+    // Step 1: Filtering missingness
+    FILTERING_MISSINGNESS(input_files_ch)
 
+    // Step 2: Check sex discrepancy
+    CHECK_SEX_DISCREPANCY(FILTERING_MISSINGNESS.out.second_filter_individual)
 
 }
