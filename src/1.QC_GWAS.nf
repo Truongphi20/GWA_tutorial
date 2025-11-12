@@ -226,6 +226,10 @@ process HWE_CHECKING_PLOT {
     path hwe_check_output
     path hwe_plot_script
 
+    output:
+    path("histhwe.pdf"),   emit: normal_plot
+    path("histhwe_below_theshold.pdf"), emit: zoom_plot
+
     script:
     """
     awk '{ if (\$9 <0.00001) print \$0 }' plink.hwe>plinkzoomhwe.hwe
