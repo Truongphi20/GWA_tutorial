@@ -144,6 +144,66 @@ process SEX_DISCREPANCY_HANDLE_BY_IMPUTE {
     """
 }
 
+process MAF_AUTOSOMAL_SELECTION {
+    container "biocontainers/plink:v1.07dfsg-2-deb_cv1"
+
+    input:
+    path sex_discrepancy_output
+
+    output:
+    path("HapMap_3_r3_7.{bed,bim,fam}"), emit: plink_files
+    path("snp_1_22.txt")               , emit: snp_list
+    path("MAF_check.frq")              , emit: check_frq
+
+    script:
+    """
+    awk '{ if (\$1 >= 1 && \$1 <= 22) print \$2 }' HapMap_3_r3_6.bim > snp_1_22.txt
+    /usr/lib/debian-med/bin/plink --bfile HapMap_3_r3_6 \\
+                                  --extract snp_1_22.txt \\
+                                  --make-bed \\
+                                  --out HapMap_3_r3_7
+
+    /usr/lib/debian-med/bin/plink --bfile HapMap_3_r3_7 \\
+                                  --freq \\
+                                  --out MAF_check
+    """
+}
+
+process MAF_PLOT_DISTRIBUTION {
+    container "rocker/r-base:4.5.2"
+
+    input:
+    path check_frq_maf
+    path maf_check_script
+
+    output:
+    path("MAF_distribution.pdf")
+
+    script:
+    """
+    Rscript --no-save $maf_check_script
+    """
+
+}
+
+process MAF_FILTERING {
+    container "biocontainers/plink:v1.07dfsg-2-deb_cv1"
+
+    input:
+    path maf_selection_output
+
+    output:
+    path("HapMap_3_r3_8.{bed,bim,fam}")
+
+    script:
+    """
+    /usr/lib/debian-med/bin/plink --bfile HapMap_3_r3_7 \\
+                                  --maf 0.05 \\
+                                  --make-bed \\
+                                  --out HapMap_3_r3_8
+    """
+}
+
 
 
 workflow QC_GWAS {
@@ -181,4 +241,15 @@ workflow QC_GWAS {
         FILTERING_MISSINGNESS.out.second_filter_individual
     )
 
+    // Step 3: Filtering by MAF
+    // Generate a bfile with autosomal SNPs only and delete SNPs with a low minor allele frequency (MAF).
+    MAF_AUTOSOMAL_SELECTION(SEX_DISCREPANCY_HANDLE_BY_IMPUTE.out)
+
+    maf_check_script = channel.fromPath("${projectDir}/1_QC_GWAS/MAF_check.R")
+    MAF_PLOT_DISTRIBUTION(
+        MAF_AUTOSOMAL_SELECTION.out.check_frq, 
+        maf_check_script
+    )
+    
+    MAF_FILTERING(MAF_AUTOSOMAL_SELECTION.out.plink_files)
 }
