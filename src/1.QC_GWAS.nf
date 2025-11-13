@@ -237,6 +237,43 @@ process HWE_CHECKING_PLOT {
     """
 }
 
+process HWE_HANDLE_CONTROL {
+    container "biocontainers/plink:v1.07dfsg-2-deb_cv1"
+
+    input:
+    path maf_filering_output
+
+    output:
+    path("HapMap_hwe_filter_step1.{bed,bim,fam}")
+
+    script:
+    """
+    /usr/lib/debian-med/bin/plink --bfile HapMap_3_r3_8 \\
+                                  --hwe 1e-6 \\
+                                  --make-bed \\
+                                  --out HapMap_hwe_filter_step1
+    """ 
+}
+
+process HWE_HANDLE_CASES {
+    container "biocontainers/plink:v1.07dfsg-2-deb_cv1"
+
+    input:
+    path first_hwe_filter
+
+    output:
+    path("HapMap_3_r3_9.{bed,bim,fam}")
+
+    script:
+    """
+    /usr/lib/debian-med/bin/plink --bfile HapMap_hwe_filter_step1 \\
+                                  --hwe 1e-10 \\
+                                  --hwe-all \\
+                                  --make-bed \\
+                                  --out HapMap_3_r3_9
+    """ 
+}
+
 
 
 workflow QC_GWAS {
@@ -294,4 +331,8 @@ workflow QC_GWAS {
         HWE_CHECKING.out,
         hwe_plot_script 
     )
+
+    HWE_HANDLE_CONTROL(MAF_FILTERING.out)
+    HWE_HANDLE_CASES(HWE_HANDLE_CONTROL.out)
+    
 }
