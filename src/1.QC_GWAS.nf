@@ -381,6 +381,25 @@ process RELATEDNESS_PLOT_RELATIONSHIP {
 }
 
 
+process RELATEDNESS_FILTER_FOUNDERS {
+    container "biocontainers/plink:v1.07dfsg-2-deb_cv1"
+
+    input:
+    path het_output
+
+    output:
+    path("HapMap_3_r3_11.{bed,bim,fam}")
+
+    script:
+    """
+    /usr/lib/debian-med/bin/plink --bfile HapMap_3_r3_10 \\
+                                  --filter-founders \\
+                                  --make-bed \\
+                                  --out HapMap_3_r3_11
+    """
+}
+
+
 workflow QC_GWAS {
     take:
     input_files_ch     // file: [./1_QC_GWAS/HapMap_3_r3_1.{bed,bim,fam}]
@@ -467,4 +486,6 @@ workflow QC_GWAS {
 
     rel_plot_script = channel.fromPath("./1_QC_GWAS/Relatedness.R")
     RELATEDNESS_PLOT_RELATIONSHIP(RELATEDNESS_CHECK.out, rel_plot_script)
+
+    RELATEDNESS_FILTER_FOUNDERS(HETEROZYGOSITY_DROP_FAILED_SAMPLES.out)
 }
