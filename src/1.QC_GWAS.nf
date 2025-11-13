@@ -305,14 +305,17 @@ process HETEROZYGOSITY_PLOT_DISTRIBUTION {
 
     input:
     path het_check
-    path het_plot_script
+    path het_plot_rate_script
+    path het_outlier_script
 
     output:
-    path("heterozygosity.pdf")
+    path("heterozygosity.pdf"), emit: rate 
+    path("fail-het-qc.txt"), emit: outlier
 
     script:
     """
-    Rscript --no-save $het_plot_script
+    Rscript --no-save $het_plot_rate_script
+    Rscript --no-save $het_outlier_script
     """
 }
 
@@ -383,8 +386,10 @@ workflow QC_GWAS {
     HETEROZYGOSITY_CHECK(HWE_HANDLE_CASES.out, inversion_file)
 
     het_plot_script = channel.fromPath("./1_QC_GWAS/check_heterozygosity_rate.R")
+    het_outlier_script = channel.fromPath("./1_QC_GWAS/heterozygosity_outliers_list.R")
     HETEROZYGOSITY_PLOT_DISTRIBUTION(
         HETEROZYGOSITY_CHECK.out.het,
-        het_plot_script
+        het_plot_script,
+        het_outlier_script
     )
 }
