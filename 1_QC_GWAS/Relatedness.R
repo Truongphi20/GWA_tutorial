@@ -1,5 +1,5 @@
 pdf("relatedness.pdf")
-relatedness = read.table("pihat_min0.2.genome", header=T)
+relatedness = read.table("pihat_min0.2.genome", header=T, stringsAsFactors = T)
 par(pch=16, cex=1)
 with(relatedness,plot(Z0,Z1, xlim=c(0,1), ylim=c(0,1), type="n"))
 with(subset(relatedness,RT=="PO") , points(Z0,Z1,col=4))

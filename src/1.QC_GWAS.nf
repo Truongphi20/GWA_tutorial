@@ -360,6 +360,25 @@ process RELATEDNESS_CHECK {
     """
 }
 
+process RELATEDNESS_PLOT_RELATIONSHIP {
+    container "rocker/r-base:4.5.2"
+
+    input:
+    path rel_check_output
+    path rel_plot_script
+
+    output:
+    path("relatedness.pdf")         , emit: rel
+    path("zoom_relatedness.pdf")    , emit: zoom_rel
+    path("hist_relatedness.pdf")    , emit: hist_rel
+
+    script:
+    """
+    awk '{ if (\$8 >0.9) print \$0 }' $rel_check_output>zoom_pihat.genome
+
+    Rscript --no-save $rel_plot_script
+    """
+}
 
 
 workflow QC_GWAS {
@@ -445,4 +464,7 @@ workflow QC_GWAS {
         HETEROZYGOSITY_DROP_FAILED_SAMPLES.out,
         HETEROZYGOSITY_CHECK.out.prune
     )
+
+    rel_plot_script = channel.fromPath("./1_QC_GWAS/Relatedness.R")
+    RELATEDNESS_PLOT_RELATIONSHIP(RELATEDNESS_CHECK.out, rel_plot_script)
 }
