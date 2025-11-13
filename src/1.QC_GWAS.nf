@@ -274,6 +274,48 @@ process HWE_HANDLE_CASES {
     """ 
 }
 
+process HETEROZYGOSITY_CHECK {
+    container "biocontainers/plink:v1.07dfsg-2-deb_cv1"
+
+    input:
+    path hwe_filter_output
+    path inversion_file
+
+    output:
+    path("indepSNP.prune.in"), emit: prune
+    path("R_check.het"), emit: het
+
+    script:
+    """
+    /usr/lib/debian-med/bin/plink --bfile HapMap_3_r3_9 \\
+                                  --exclude inversion.txt \\
+                                  --range \\
+                                  --indep-pairwise 50 5 0.2 \\
+                                  --out indepSNP
+
+    /usr/lib/debian-med/bin/plink --bfile HapMap_3_r3_9 \\
+                                  --extract indepSNP.prune.in \\
+                                  --het \\
+                                  --out R_check
+    """
+}
+
+process HETEROZYGOSITY_PLOT_DISTRIBUTION {
+    container "rocker/r-base:4.5.2"
+
+    input:
+    path het_check
+    path het_plot_script
+
+    output:
+    path("heterozygosity.pdf")
+
+    script:
+    """
+    Rscript --no-save $het_plot_script
+    """
+}
+
 
 
 workflow QC_GWAS {
@@ -335,4 +377,14 @@ workflow QC_GWAS {
     HWE_HANDLE_CONTROL(MAF_FILTERING.out)
     HWE_HANDLE_CASES(HWE_HANDLE_CONTROL.out)
     
+    // Step 5: Heterozygosity
+    // Excludes individuals with high or low heterozygosity rates
+    inversion_file = channel.fromPath("./1_QC_GWAS/inversion.txt")
+    HETEROZYGOSITY_CHECK(HWE_HANDLE_CASES.out, inversion_file)
+
+    het_plot_script = channel.fromPath("./1_QC_GWAS/check_heterozygosity_rate.R")
+    HETEROZYGOSITY_PLOT_DISTRIBUTION(
+        HETEROZYGOSITY_CHECK.out.het,
+        het_plot_script
+    )
 }
