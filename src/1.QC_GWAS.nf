@@ -419,6 +419,18 @@ process RELATEDNESS_FOUNDERS_CHECK {
     """ 
 }
 
+process RELATEDNESS_DROP_LOWEST_CALL_RATE {
+    container "biocontainers/plink:v1.07dfsg-2-deb_cv1"
+
+    input:
+    path founder_filter_output
+
+    script:
+    """
+    /usr/lib/debian-med/bin/plink --bfile HapMap_3_r3_11 --missing
+    """
+}
+
 
 workflow QC_GWAS {
     take:
@@ -511,5 +523,9 @@ workflow QC_GWAS {
     RELATEDNESS_FOUNDERS_CHECK(
         RELATEDNESS_FILTER_FOUNDERS.out,
         HETEROZYGOSITY_CHECK.out.prune
+    )
+
+    RELATEDNESS_DROP_LOWEST_CALL_RATE(
+        RELATEDNESS_FILTER_FOUNDERS.out
     )
 }
