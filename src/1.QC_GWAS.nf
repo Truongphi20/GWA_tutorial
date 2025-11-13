@@ -399,6 +399,26 @@ process RELATEDNESS_FILTER_FOUNDERS {
     """
 }
 
+process RELATEDNESS_FOUNDERS_CHECK {
+    container "biocontainers/plink:v1.07dfsg-2-deb_cv1"
+
+    input:
+    path founder_filter_output
+    path het_prune
+
+    output:
+    path("pihat_min0.2_in_founders.genome")
+
+    script:
+    """
+    /usr/lib/debian-med/bin/plink --bfile HapMap_3_r3_11 \\
+                                  --extract indepSNP.prune.in \\
+                                  --genome \\
+                                  --min 0.2 \\
+                                  --out pihat_min0.2_in_founders
+    """ 
+}
+
 
 workflow QC_GWAS {
     take:
@@ -488,4 +508,8 @@ workflow QC_GWAS {
     RELATEDNESS_PLOT_RELATIONSHIP(RELATEDNESS_CHECK.out, rel_plot_script)
 
     RELATEDNESS_FILTER_FOUNDERS(HETEROZYGOSITY_DROP_FAILED_SAMPLES.out)
+    RELATEDNESS_FOUNDERS_CHECK(
+        RELATEDNESS_FILTER_FOUNDERS.out,
+        HETEROZYGOSITY_CHECK.out.prune
+    )
 }
