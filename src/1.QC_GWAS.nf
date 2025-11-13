@@ -319,6 +319,27 @@ process HETEROZYGOSITY_PLOT_DISTRIBUTION {
     """
 }
 
+process HETEROZYGOSITY_DROP_FAILED_SAMPLES {
+    container "biocontainers/plink:v1.07dfsg-2-deb_cv1"
+
+    input:
+    path hwe_filter_output
+    path het_outlier_list 
+
+    output:
+    path("HapMap_3_r3_10.{bed,bim,fam}")
+
+    script:
+    """
+    sed 's/"// g' $het_outlier_list| awk '{print\$1, \$2}'> het_fail_ind.txt
+    
+    /usr/lib/debian-med/bin/plink --bfile HapMap_3_r3_9 \\
+                                  --remove het_fail_ind.txt \\
+                                  --make-bed \\
+                                  --out HapMap_3_r3_10
+    """
+}
+
 
 
 workflow QC_GWAS {
@@ -391,5 +412,10 @@ workflow QC_GWAS {
         HETEROZYGOSITY_CHECK.out.het,
         het_plot_script,
         het_outlier_script
+    )
+
+    HETEROZYGOSITY_DROP_FAILED_SAMPLES(
+        HWE_HANDLE_CASES.out,
+        HETEROZYGOSITY_PLOT_DISTRIBUTION.out.outlier
     )
 }
