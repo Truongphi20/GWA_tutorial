@@ -340,6 +340,26 @@ process HETEROZYGOSITY_DROP_FAILED_SAMPLES {
     """
 }
 
+process RELATEDNESS_CHECK {
+    container "biocontainers/plink:v1.07dfsg-2-deb_cv1"
+
+    input:
+    path het_output
+    path het_prune
+
+    output:
+    path("pihat_min0.2.genome")
+
+    script:
+    """
+    /usr/lib/debian-med/bin/plink --bfile HapMap_3_r3_10 \\
+                                  --extract indepSNP.prune.in \\
+                                  --genome \\
+                                  --min 0.2 \\
+                                  --out pihat_min0.2
+    """
+}
+
 
 
 workflow QC_GWAS {
@@ -417,5 +437,12 @@ workflow QC_GWAS {
     HETEROZYGOSITY_DROP_FAILED_SAMPLES(
         HWE_HANDLE_CASES.out,
         HETEROZYGOSITY_PLOT_DISTRIBUTION.out.outlier
+    )
+
+    // Step 6: Relatedness
+    // Assuming a random population sample we are going to exclude all individuals above the pihat threshold of 0.2 in this tutorial.
+    RELATEDNESS_CHECK(
+        HETEROZYGOSITY_DROP_FAILED_SAMPLES.out,
+        HETEROZYGOSITY_CHECK.out.prune
     )
 }
