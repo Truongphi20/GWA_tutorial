@@ -451,6 +451,25 @@ process RELATEDNESS_GET_DROPPED_SAMPLES_LIST {
     """
 }
 
+process RELATEDNESS_DELETE_RELATED_SAMPLES {
+    container "biocontainers/plink:v1.07dfsg-2-deb_cv1"
+
+    input:
+    path drop_sample_list 
+    path founder_filter_output
+
+    output:
+    path("HapMap_3_r3_12.{bed,bim,fam}")
+
+    script:
+    """
+    /usr/lib/debian-med/bin/plink --bfile HapMap_3_r3_11 \\
+                                  --remove 0.2_low_call_rate_pihat.txt \\
+                                  --make-bed \\
+                                  --out HapMap_3_r3_12
+    """ 
+}
+
 
 workflow QC_GWAS {
     take:
@@ -554,5 +573,9 @@ workflow QC_GWAS {
         RELATEDNESS_MISSING_CHECK.out,
         RELATEDNESS_CHECK.out,
         get_dropped_sample_script
+    )
+    RELATEDNESS_DELETE_RELATED_SAMPLES(
+        RELATEDNESS_GET_DROPPED_SAMPLES_LIST.out,
+        RELATEDNESS_FILTER_FOUNDERS.out
     )
 }
