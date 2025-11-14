@@ -578,4 +578,8 @@ workflow QC_GWAS {
         RELATEDNESS_GET_DROPPED_SAMPLES_LIST.out,
         RELATEDNESS_FILTER_FOUNDERS.out
     )
+
+    emit:
+    general_qc_out  = RELATEDNESS_DELETE_RELATED_SAMPLES.out        // HapMap_3_r3_12.fam,HapMap_3_r3_12.bed, and HapMap_3_r3_12.bim
+    het_prune_check = HETEROZYGOSITY_CHECK.out.prune                // indepSNP.prune.in
 }
