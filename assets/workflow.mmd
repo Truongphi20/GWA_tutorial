@@ -1,0 +1,122 @@
+flowchart TB
+    subgraph " "
+    v0["Channel.fromPath"]
+    v4["Channel.fromPath"]
+    v13["Channel.fromPath"]
+    v23["Channel.fromPath"]
+    v28["Channel.fromPath"]
+    v34["Channel.fromPath"]
+    v36["Channel.fromPath"]
+    v37["Channel.fromPath"]
+    v42["Channel.fromPath"]
+    v51["Channel.fromPath"]
+    end
+    subgraph "QC_GWAS [QC_GWAS]"
+    v2(["INVESTIGATE_MISSINGNESS"])
+    v5(["VISUALIZE_MISSINGNESS"])
+    v8(["FILTERING_MISSINGNESS"])
+    v12(["CHECK_SEX_DISCREPANCY"])
+    v14(["SEX_DISCREPANCY_VISUALIZE"])
+    v18(["SEX_DISCREPANCY_HANDLE_BY_REMOVE"])
+    v20(["SEX_DISCREPANCY_HANDLE_BY_IMPUTE"])
+    v21(["MAF_AUTOSOMAL_SELECTION"])
+    v24(["MAF_PLOT_DISTRIBUTION"])
+    v26(["MAF_FILTERING"])
+    v27(["HWE_CHECKING"])
+    v29(["HWE_CHECKING_PLOT"])
+    v32(["HWE_HANDLE_CONTROL"])
+    v33(["HWE_HANDLE_CASES"])
+    v35(["HETEROZYGOSITY_CHECK"])
+    v38(["HETEROZYGOSITY_PLOT_DISTRIBUTION"])
+    v40(["HETEROZYGOSITY_DROP_FAILED_SAMPLES"])
+    v41(["RELATEDNESS_CHECK"])
+    v43(["RELATEDNESS_PLOT_RELATIONSHIP"])
+    v47(["RELATEDNESS_FILTER_FOUNDERS"])
+    v48(["RELATEDNESS_FOUNDERS_CHECK"])
+    v50(["RELATEDNESS_MISSING_CHECK"])
+    v52(["RELATEDNESS_GET_DROPPED_SAMPLES_LIST"])
+    v53(["RELATEDNESS_DELETE_RELATED_SAMPLES"])
+    end
+    subgraph " "
+    v3[" "]
+    v6[" "]
+    v7[" "]
+    v9[" "]
+    v10[" "]
+    v11[" "]
+    v15[" "]
+    v16[" "]
+    v17[" "]
+    v19[" "]
+    v22[" "]
+    v25[" "]
+    v30[" "]
+    v31[" "]
+    v39[" "]
+    v44[" "]
+    v45[" "]
+    v46[" "]
+    v49[" "]
+    v54[" "]
+    end
+    v1(( ))
+    v0 --> v1
+    v1 --> v2
+    v2 --> v5
+    v2 --> v3
+    v4 --> v5
+    v5 --> v7
+    v5 --> v6
+    v1 --> v8
+    v8 --> v11
+    v8 --> v10
+    v8 --> v9
+    v8 --> v12
+    v8 --> v18
+    v8 --> v20
+    v12 --> v14
+    v12 --> v18
+    v13 --> v14
+    v14 --> v17
+    v14 --> v16
+    v14 --> v15
+    v18 --> v19
+    v20 --> v21
+    v21 --> v26
+    v21 --> v22
+    v21 --> v24
+    v23 --> v24
+    v24 --> v25
+    v26 --> v27
+    v26 --> v32
+    v27 --> v29
+    v28 --> v29
+    v29 --> v31
+    v29 --> v30
+    v32 --> v33
+    v33 --> v35
+    v33 --> v40
+    v34 --> v35
+    v35 --> v41
+    v35 --> v38
+    v35 --> v48
+    v36 --> v38
+    v37 --> v38
+    v38 --> v39
+    v38 --> v40
+    v40 --> v41
+    v40 --> v47
+    v41 --> v43
+    v41 --> v52
+    v42 --> v43
+    v43 --> v46
+    v43 --> v45
+    v43 --> v44
+    v47 --> v48
+    v47 --> v50
+    v47 --> v53
+    v48 --> v49
+    v50 --> v52
+    v51 --> v52
+    v52 --> v53
+    v53 --> v54
