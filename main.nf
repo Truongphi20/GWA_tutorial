@@ -1,5 +1,6 @@
 #!/usr/bin/env nextflow
-include { QC_GWAS }     from        "./src/1.QC_GWAS.nf" 
+include { QC_GWAS            }     from        "./src/1.QC_GWAS.nf" 
+include { POP_STRATIFICATION }     from        "./src/2.Population_stratification"
 
 workflow{
     // Inputs
@@ -7,4 +8,5 @@ workflow{
 
     // Workflow
     QC_GWAS(input_files_ch)
+    POP_STRATIFICATION()
 }
