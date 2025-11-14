@@ -419,15 +419,35 @@ process RELATEDNESS_FOUNDERS_CHECK {
     """ 
 }
 
-process RELATEDNESS_DROP_LOWEST_CALL_RATE {
+process RELATEDNESS_MISSING_CHECK {
     container "biocontainers/plink:v1.07dfsg-2-deb_cv1"
 
     input:
     path founder_filter_output
 
+    output:
+    path("plink.{lmiss,imiss}")
+
     script:
     """
     /usr/lib/debian-med/bin/plink --bfile HapMap_3_r3_11 --missing
+    """
+}
+
+process RELATEDNESS_GET_DROPPED_SAMPLES_LIST {
+    container "community.wave.seqera.io/library/pip_networkx_pandas:7926d52a5e9ee4bd"
+
+    input:
+    path miss_check_file
+    path founder_pihat
+    path get_dropped_sample_script
+
+    output:
+    path("0.2_low_call_rate_pihat.txt")
+
+    script:
+    """
+    python $get_dropped_sample_script
     """
 }
 
@@ -525,7 +545,14 @@ workflow QC_GWAS {
         HETEROZYGOSITY_CHECK.out.prune
     )
 
-    RELATEDNESS_DROP_LOWEST_CALL_RATE(
+    RELATEDNESS_MISSING_CHECK(
         RELATEDNESS_FILTER_FOUNDERS.out
+    )
+
+    get_dropped_sample_script = channel.fromPath("./survey/relatedness_drop_call_rate/create_drop_sample_list.py")
+    RELATEDNESS_GET_DROPPED_SAMPLES_LIST(
+        RELATEDNESS_MISSING_CHECK.out,
+        RELATEDNESS_CHECK.out,
+        get_dropped_sample_script
     )
 }
