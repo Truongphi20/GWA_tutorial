@@ -17,20 +17,20 @@ process OKGP_CONVERT_BFILE {
 }
 
 process OKGP_FILL_MISSING_RSID {
-    container "biocontainers/plink:v1.07dfsg-2-deb_cv1"
+    container "biocontainer/plink2:alpha2.3_jan2020"
 
     input:
     path original_okgp
 
     output:
-    path(" ALL.2of4intersection.20100804.genotypes_no_missing_IDs.{bed,bim,fam}")
+    path("ALL.2of4intersection.20100804.genotypes_no_missing_IDs.{bed,bim,fam}")
 
     script:
     """
-    /usr/lib/debian-med/bin/plink --bfile ALL.2of4intersection.20100804.genotypes \\
-                                  --set-missing-var-ids @:#[b37]\$1,\$2 \\
-                                  --make-bed \\
-                                  --out ALL.2of4intersection.20100804.genotypes_no_missing_IDs
+    plink2 --bfile ALL.2of4intersection.20100804.genotypes \\
+            --set-missing-var-ids @:#[b37]\\\$r,\\\$a \\
+            --make-bed \\
+            --out ALL.2of4intersection.20100804.genotypes_no_missing_IDs
     """
 }
 
