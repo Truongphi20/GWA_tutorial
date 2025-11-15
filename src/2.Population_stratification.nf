@@ -191,6 +191,23 @@ process HAMONIZE_OKGP_BUILD {
     """
 }
 
+process MERGE_ENSURE_HAPMAP_REF {
+    container "biocontainer/plink2:alpha2.3_jan2020"
+
+    input:
+    path okgp_harmonize_build
+    path hapmap_harmonize_var
+
+    script:
+    """
+    awk '{print\$2,\$5}' 1kG_MDS7.bim > 1kg_ref-list.txt
+    plink2 --bfile HapMap_MDS \\
+           --ref-allele 1kg_ref-list.txt \\
+           --make-bed \\
+           --out HapMap-adj
+    """
+}
+
 
 workflow POP_STRATIFICATION {
     take:
@@ -224,6 +241,10 @@ workflow POP_STRATIFICATION {
         HAMONIZE_HAPMAP_VARIANT.out
     )
 
-
+    // Step 3: Merge 1KGP and HapMap data
+    MERGE_ENSURE_HAPMAP_REF(
+        HAMONIZE_OKGP_BUILD.out,
+        HAMONIZE_HAPMAP_VARIANT.out
+    )
 
 }
