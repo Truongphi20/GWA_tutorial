@@ -256,7 +256,7 @@ process MERGE_STRAND_PB_FLIP {
     """
 }
 
-process MERGE_STRAND_PB_DROP_VARIANTS {
+process MERGE_DROP_VARIANTS {
     container "biocontainer/plink2:alpha2.3_jan2020"
 
     input:
@@ -279,6 +279,27 @@ process MERGE_STRAND_PB_DROP_VARIANTS {
            --exclude SNPs_for_exlusion.txt \\
            --make-bed \\
            --out 1kG_MDS8
+    """
+}
+
+process MERGE_HAPMAP_AND_OKGP {
+    container "biocontainers/plink:v1.07dfsg-2-deb_cv1"
+
+    input:
+    path hapmap_dropped_var
+    path okgp_dropped_var
+
+    output:
+    path("MDS_merge2.{bed,bim,fam}")
+
+    script:
+    """
+    /usr/lib/debian-med/bin/plink \\
+           --bfile HapMap_MDS2 \\
+           --bmerge 1kG_MDS8.bed 1kG_MDS8.bim 1kG_MDS8.fam \\
+           --allow-no-sex \\
+           --make-bed \\
+           --out MDS_merge2
     """
 }
 
@@ -332,9 +353,14 @@ workflow POP_STRATIFICATION {
         MERGE_ENSURE_HAPMAP_REF.out.ref_list
     )
 
-    MERGE_STRAND_PB_DROP_VARIANTS(
+    MERGE_DROP_VARIANTS(
         MERGE_STRAND_PB_FLIP.out.bfiles,
         HAMONIZE_OKGP_BUILD.out
+    )
+
+    MERGE_HAPMAP_AND_OKGP(
+        MERGE_DROP_VARIANTS.out.hapmap,
+        MERGE_DROP_VARIANTS.out.okgp
     )
 
 }
