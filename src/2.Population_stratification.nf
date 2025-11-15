@@ -129,7 +129,7 @@ process OKGP_QC_MAF {
     """
 }
 
-process HAMONIZE_OKGP {
+process HAMONIZE_OKGP_VARIANT {
     container "biocontainer/plink2:alpha2.3_jan2020"
 
     input:
@@ -149,7 +149,7 @@ process HAMONIZE_OKGP {
     """
 }
 
-process HAMONIZE_HAPMAP {
+process HAMONIZE_HAPMAP_VARIANT {
     container "biocontainers/plink:v1.07dfsg-2-deb_cv1"
 
     input:
@@ -189,13 +189,13 @@ workflow POP_STRATIFICATION {
     OKGP_QC_MAF(OKGP_QC_STRICTHEN_DROP_INDIVIDUALS.out)
 
     // Step 2: Harmonize 1KGP and HapMap data
-    HAMONIZE_OKGP(
+    HAMONIZE_OKGP_VARIANT(
         general_qc_out,
         OKGP_QC_MAF.out
     )
 
-    HAMONIZE_HAPMAP(
-        HAMONIZE_OKGP.out,
+    HAMONIZE_HAPMAP_VARIANT(
+        HAMONIZE_OKGP_VARIANT.out,
         general_qc_out
     )
 
