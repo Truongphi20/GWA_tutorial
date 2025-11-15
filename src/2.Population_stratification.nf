@@ -171,6 +171,26 @@ process HAMONIZE_HAPMAP_VARIANT {
     """
 }
 
+process HAMONIZE_OKGP_BUILD {
+    container "biocontainer/plink2:alpha2.3_jan2020"
+
+    input:
+    path okgp_harmonize_var
+    path hapmap_harmonize_var
+
+    output:
+    path("1kG_MDS7.{bed,bim,fam}")
+
+    script:
+    """
+    awk '{print\$2,\$4}' HapMap_MDS.bim > buildhapmap.txt
+    plink2 --bfile 1kG_MDS6 \\
+           --update-map buildhapmap.txt \\
+           --make-bed \\
+           --out 1kG_MDS7
+    """
+}
+
 
 workflow POP_STRATIFICATION {
     take:
@@ -198,5 +218,12 @@ workflow POP_STRATIFICATION {
         HAMONIZE_OKGP_VARIANT.out,
         general_qc_out
     )
+
+    HAMONIZE_OKGP_BUILD(
+        HAMONIZE_OKGP_VARIANT.out,
+        HAMONIZE_HAPMAP_VARIANT.out
+    )
+
+
 
 }
