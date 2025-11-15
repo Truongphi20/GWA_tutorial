@@ -198,6 +198,9 @@ process MERGE_ENSURE_HAPMAP_REF {
     path okgp_harmonize_build
     path hapmap_harmonize_var
 
+    output:
+    path("HapMap-adj.{bed,bim,fam}")
+
     script:
     """
     awk '{print\$2,\$5}' 1kG_MDS7.bim > 1kg_ref-list.txt
@@ -207,6 +210,23 @@ process MERGE_ENSURE_HAPMAP_REF {
            --out HapMap-adj
     """
 }
+
+process MERGE_STRAND_PB_CHECK {
+
+    input:
+    path okgp_harmonize_build
+    path hapmap_ensure_ref
+
+    output:
+    path("all_differences.txt")
+
+    script:
+    """
+    awk '{print\$2,\$5,\$6}' 1kG_MDS7.bim > 1kGMDS7_tmp
+    awk '{print\$2,\$5,\$6}' HapMap-adj.bim > HapMap-adj_tmp
+    sort 1kGMDS7_tmp HapMap-adj_tmp |uniq -u > all_differences.txt
+    """
+} 
 
 
 workflow POP_STRATIFICATION {
@@ -245,6 +265,11 @@ workflow POP_STRATIFICATION {
     MERGE_ENSURE_HAPMAP_REF(
         HAMONIZE_OKGP_BUILD.out,
         HAMONIZE_HAPMAP_VARIANT.out
+    )
+
+    MERGE_STRAND_PB_CHECK(
+        HAMONIZE_OKGP_BUILD.out,
+        MERGE_ENSURE_HAPMAP_REF.out
     )
 
 }
