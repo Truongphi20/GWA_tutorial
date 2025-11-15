@@ -199,7 +199,8 @@ process MERGE_ENSURE_HAPMAP_REF {
     path hapmap_harmonize_var
 
     output:
-    path("HapMap-adj.{bed,bim,fam}")
+    path("HapMap-adj.{bed,bim,fam}"), emit: bfiles
+    path("1kg_ref-list.txt"), emit: ref_list
 
     script:
     """
@@ -227,6 +228,33 @@ process MERGE_STRAND_PB_CHECK {
     sort 1kGMDS7_tmp HapMap-adj_tmp |uniq -u > all_differences.txt
     """
 } 
+
+process MERGE_STRAND_PB_FLIP {
+    container "biocontainers/plink:v1.07dfsg-2-deb_cv1"
+
+    input:
+    path strand_check
+    path hapmap_ensure_ref
+    path hapmap_ensure_ref_list
+
+    output:
+    path("corrected_hapmap.{bed,bim,fam}"), emit: bfiles 
+    path("uncorresponding_SNPs.txt"), emit: promblematic_still
+
+    script:
+    """
+    awk '{print\$1}' all_differences.txt | sort -u > flip_list.txt
+    /usr/lib/debian-med/bin/plink \\
+            --bfile HapMap-adj \\
+            --flip flip_list.txt \\
+            --reference-allele 1kg_ref-list.txt \\
+            --make-bed \\
+            --out corrected_hapmap
+
+    awk '{print\$2,\$5,\$6}' corrected_hapmap.bim > corrected_hapmap_tmp
+    sort 1kGMDS7_tmp corrected_hapmap_tmp |uniq -u  > uncorresponding_SNPs.txt
+    """
+}
 
 
 workflow POP_STRATIFICATION {
@@ -269,7 +297,13 @@ workflow POP_STRATIFICATION {
 
     MERGE_STRAND_PB_CHECK(
         HAMONIZE_OKGP_BUILD.out,
-        MERGE_ENSURE_HAPMAP_REF.out
+        MERGE_ENSURE_HAPMAP_REF.out.bfiles
+    )
+
+    MERGE_STRAND_PB_FLIP(
+        MERGE_STRAND_PB_CHECK.out,
+        MERGE_ENSURE_HAPMAP_REF.out.bfiles,
+        MERGE_ENSURE_HAPMAP_REF.out.ref_list
     )
 
 }
