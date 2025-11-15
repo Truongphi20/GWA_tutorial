@@ -5,8 +5,9 @@ include { POP_STRATIFICATION }     from        "./src/2.Population_stratificatio
 workflow{
     // Inputs
     input_files_ch = channel.fromPath("./1_QC_GWAS/HapMap_3_r3_1.{bed,bim,fam}").collect()
+    okgp_vcf = channel.fromPath("/genome_data/ALL.2of4intersection.20100804.genotypes.vcf.gz")
 
     // Workflow
     QC_GWAS(input_files_ch)
-    POP_STRATIFICATION()
+    POP_STRATIFICATION(okgp_vcf)
 }
