@@ -9,5 +9,9 @@ workflow{
 
     // Workflow
     QC_GWAS(input_files_ch)
-    POP_STRATIFICATION(okgp_vcf)
+    POP_STRATIFICATION(
+        okgp_vcf,
+        QC_GWAS.out.general_qc_out,
+        QC_GWAS.out.het_prune_check
+    )
 }

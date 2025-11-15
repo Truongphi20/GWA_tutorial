@@ -129,10 +129,32 @@ process OKGP_QC_MAF {
     """
 }
 
+process OKGP_GET_INTERCEPT_VARIANTS {
+    container "biocontainer/plink2:alpha2.3_jan2020"
+
+    input:
+    path general_qc_out
+    path drop_by_maf
+
+    output:
+    path("1kG_MDS6.{bed,bim,fam}")
+
+    script:
+    """
+    awk '{print\$2}' HapMap_3_r3_12.bim > HapMap_SNPs.txt
+    plink2 --bfile 1kG_MDS5 \\
+            --extract HapMap_SNPs.txt \\
+            --make-bed \\
+            --out 1kG_MDS6
+    """
+}
+
 
 workflow POP_STRATIFICATION {
     take:
     okgp_vcf
+    general_qc_out              // HapMap_3_r3_12.fam,HapMap_3_r3_12.bed, and HapMap_3_r3_12.bim
+    het_prune_check             // indepSNP.prune.in
 
     main:
     // Step 1: Prepare 1KGP data 
@@ -143,4 +165,9 @@ workflow POP_STRATIFICATION {
     OKGP_QC_STRICTHEN_DROP_VARIANTS(OKGP_QC_DROP_INDIVIDUALS.out)
     OKGP_QC_STRICTHEN_DROP_INDIVIDUALS(OKGP_QC_STRICTHEN_DROP_VARIANTS.out)
     OKGP_QC_MAF(OKGP_QC_STRICTHEN_DROP_INDIVIDUALS.out)
+    OKGP_GET_INTERCEPT_VARIANTS(
+        general_qc_out,
+        OKGP_QC_MAF.out
+    )
+
 }
