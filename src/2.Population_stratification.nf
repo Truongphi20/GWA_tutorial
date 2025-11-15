@@ -150,7 +150,7 @@ process HAMONIZE_OKGP {
 }
 
 process HAMONIZE_HAPMAP {
-    container "biocontainer/plink2:alpha2.3_jan2020"
+    container "biocontainers/plink:v1.07dfsg-2-deb_cv1"
 
     input:
     path hamonized_okgp
@@ -162,7 +162,8 @@ process HAMONIZE_HAPMAP {
     script:
     """
     awk '{print\$2}' 1kG_MDS6.bim > 1kG_MDS6_SNPs.txt
-    plink2 --bfile HapMap_3_r3_12 \\
+    /usr/lib/debian-med/bin/plink \\
+           --bfile HapMap_3_r3_12 \\
            --extract 1kG_MDS6_SNPs.txt \\
            --recode \\
            --make-bed \\
