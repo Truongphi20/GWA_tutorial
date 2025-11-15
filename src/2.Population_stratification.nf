@@ -256,6 +256,32 @@ process MERGE_STRAND_PB_FLIP {
     """
 }
 
+process MERGE_STRAND_PB_DROP_VARIANTS {
+    container "biocontainer/plink2:alpha2.3_jan2020"
+
+    input:
+    path corrected_hapmap
+    path okgp_harmonize_build
+
+    output:
+    path("HapMap_MDS2.{bed,bim,fam}")       , emit: hapmap 
+    path("1kG_MDS8.{bed,bim,fam}")          , emit: okgp
+
+    script:
+    """
+    awk '{print\$1}' uncorresponding_SNPs.txt | sort -u > SNPs_for_exlusion.txt
+    plink2 --bfile corrected_hapmap \\
+           --exclude SNPs_for_exlusion.txt \\
+           --make-bed \\
+           --out HapMap_MDS2
+    
+    plink2 --bfile 1kG_MDS7 \\
+           --exclude SNPs_for_exlusion.txt \\
+           --make-bed \\
+           --out 1kG_MDS8
+    """
+}
+
 
 workflow POP_STRATIFICATION {
     take:
@@ -304,6 +330,11 @@ workflow POP_STRATIFICATION {
         MERGE_STRAND_PB_CHECK.out,
         MERGE_ENSURE_HAPMAP_REF.out.bfiles,
         MERGE_ENSURE_HAPMAP_REF.out.ref_list
+    )
+
+    MERGE_STRAND_PB_DROP_VARIANTS(
+        MERGE_STRAND_PB_FLIP.out.bfiles,
+        HAMONIZE_OKGP_BUILD.out
     )
 
 }
