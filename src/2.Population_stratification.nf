@@ -110,6 +110,25 @@ process OKGP_QC_STRICTHEN_DROP_INDIVIDUALS {
     """
 }
 
+process OKGP_QC_MAF {
+    container "biocontainer/plink2:alpha2.3_jan2020"
+
+    input:
+    path drop_vars_and_ind
+
+    output:
+    path("1kG_MDS5.{bed,bim,fam}")
+
+    script:
+    """
+    plink2 --bfile 1kG_MDS4 \\
+            --maf 0.05 \\
+            --allow-no-sex \\
+            --make-bed \\
+            --out 1kG_MDS5
+    """
+}
+
 
 workflow POP_STRATIFICATION {
     take:
@@ -123,4 +142,5 @@ workflow POP_STRATIFICATION {
     OKGP_QC_DROP_INDIVIDUALS(OKGP_QC_DROP_VARIANTS.out)
     OKGP_QC_STRICTHEN_DROP_VARIANTS(OKGP_QC_DROP_INDIVIDUALS.out)
     OKGP_QC_STRICTHEN_DROP_INDIVIDUALS(OKGP_QC_STRICTHEN_DROP_VARIANTS.out)
+    OKGP_QC_MAF(OKGP_QC_STRICTHEN_DROP_INDIVIDUALS.out)
 }
