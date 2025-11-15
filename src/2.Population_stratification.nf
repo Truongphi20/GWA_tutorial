@@ -129,7 +129,7 @@ process OKGP_QC_MAF {
     """
 }
 
-process OKGP_GET_INTERCEPT_VARIANTS {
+process HAMONIZE_OKGP {
     container "biocontainer/plink2:alpha2.3_jan2020"
 
     input:
@@ -149,6 +149,27 @@ process OKGP_GET_INTERCEPT_VARIANTS {
     """
 }
 
+process HAMONIZE_HAPMAP {
+    container "biocontainer/plink2:alpha2.3_jan2020"
+
+    input:
+    path hamonized_okgp
+    path general_qc_out
+
+    output:
+    path("HapMap_MDS.{bed,bim,fam}")
+
+    script:
+    """
+    awk '{print\$2}' 1kG_MDS6.bim > 1kG_MDS6_SNPs.txt
+    plink2 --bfile HapMap_3_r3_12 \\
+           --extract 1kG_MDS6_SNPs.txt \\
+           --recode \\
+           --make-bed \\
+           --out HapMap_MDS
+    """
+}
+
 
 workflow POP_STRATIFICATION {
     take:
@@ -165,9 +186,16 @@ workflow POP_STRATIFICATION {
     OKGP_QC_STRICTHEN_DROP_VARIANTS(OKGP_QC_DROP_INDIVIDUALS.out)
     OKGP_QC_STRICTHEN_DROP_INDIVIDUALS(OKGP_QC_STRICTHEN_DROP_VARIANTS.out)
     OKGP_QC_MAF(OKGP_QC_STRICTHEN_DROP_INDIVIDUALS.out)
-    OKGP_GET_INTERCEPT_VARIANTS(
+
+    // Step 2: Harmonize 1KGP and HapMap data
+    HAMONIZE_OKGP(
         general_qc_out,
         OKGP_QC_MAF.out
+    )
+
+    HAMONIZE_HAPMAP(
+        HAMONIZE_OKGP.out,
+        general_qc_out
     )
 
 }
