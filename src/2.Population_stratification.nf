@@ -334,6 +334,32 @@ process MDS_PRUNE_SNPS {
     """
 }
 
+process MDS_ENCODE_RACES {
+    input:
+    path pop_info
+
+    output:
+    path("race_1kG14.txt")
+
+    script:
+    """
+    awk '{print\$1,\$1,\$2}' 20100804.ALL.panel > race_1kG.txt
+    sed 's/JPT/ASN/g' race_1kG.txt>race_1kG2.txt
+    sed 's/ASW/AFR/g' race_1kG2.txt>race_1kG3.txt
+    sed 's/CEU/EUR/g' race_1kG3.txt>race_1kG4.txt
+    sed 's/CHB/ASN/g' race_1kG4.txt>race_1kG5.txt
+    sed 's/CHD/ASN/g' race_1kG5.txt>race_1kG6.txt
+    sed 's/YRI/AFR/g' race_1kG6.txt>race_1kG7.txt
+    sed 's/LWK/AFR/g' race_1kG7.txt>race_1kG8.txt
+    sed 's/TSI/EUR/g' race_1kG8.txt>race_1kG9.txt
+    sed 's/MXL/AMR/g' race_1kG9.txt>race_1kG10.txt
+    sed 's/GBR/EUR/g' race_1kG10.txt>race_1kG11.txt
+    sed 's/FIN/EUR/g' race_1kG11.txt>race_1kG12.txt
+    sed 's/CHS/ASN/g' race_1kG12.txt>race_1kG13.txt
+    sed 's/PUR/AMR/g' race_1kG13.txt>race_1kG14.txt
+    """
+}
+
 
 workflow POP_STRATIFICATION {
     take:
@@ -402,5 +428,8 @@ workflow POP_STRATIFICATION {
         het_prune_check,
         MERGE_HAPMAP_AND_OKGP.out
     )
+
+    pop_info = channel.fromPath("${projectDir}/assets/20100804.ALL.panel")
+    MDS_ENCODE_RACES(pop_info)
 
 }
