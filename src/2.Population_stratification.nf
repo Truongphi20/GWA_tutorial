@@ -307,6 +307,33 @@ process MERGE_HAPMAP_AND_OKGP {
     """
 }
 
+process MDS_PRUNE_SNPS {
+    container "biocontainers/plink:v1.07dfsg-2-deb_cv1"
+
+    input:
+    path het_prune_check
+    path merge_bfile
+
+    output:
+    path("MDS_merge2.genome")                       , emit: genome 
+    path("MDS_merge2.{cluster1,cluster2,cluster3}") , emit: cluster
+
+
+    script:
+    """
+    /usr/lib/debian-med/bin/plink --bfile MDS_merge2 \\
+                                  --extract indepSNP.prune.in \\
+                                  --genome \\
+                                  --out MDS_merge2
+
+    /usr/lib/debian-med/bin/plink --bfile MDS_merge2 \\
+                                  --read-genome MDS_merge2.genome \\
+                                  --cluster \\
+                                  --mds-plot 10 \\
+                                  --out MDS_merge2
+    """
+}
+
 
 workflow POP_STRATIFICATION {
     take:
@@ -368,6 +395,12 @@ workflow POP_STRATIFICATION {
     MERGE_HAPMAP_AND_OKGP(
         MERGE_DROP_VARIANTS.out.hapmap,
         MERGE_DROP_VARIANTS.out.okgp
+    )
+
+    // Step 4: Performing MDS-plot
+    MDS_PRUNE_SNPS(
+        het_prune_check,
+        MERGE_HAPMAP_AND_OKGP.out
     )
 
 }
