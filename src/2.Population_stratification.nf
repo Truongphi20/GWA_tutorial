@@ -317,6 +317,7 @@ process MDS_PRUNE_SNPS {
     output:
     path("MDS_merge2.genome")                       , emit: genome 
     path("MDS_merge2.{cluster1,cluster2,cluster3}") , emit: cluster
+    path("MDS_merge2.mds")                          , emit: mds
 
 
     script:
@@ -364,6 +365,23 @@ process MDS_ENCODE_RACES {
 
     # Concatenate racefiles.
     cat race_1kG14.txt racefile_own.txt | sed -e '1i\\FID IID race' > racefile.txt
+    """
+}
+
+process MDS_PLOTTING {
+    container "rocker/r-base:4.5.2"
+
+    input:
+    path mds_plot_script
+    path merge_mds
+    path race_file
+
+    output:
+    path("MDS.pdf")
+
+    script:
+    """
+    Rscript MDS_merged.R 
     """
 }
 
@@ -440,6 +458,13 @@ workflow POP_STRATIFICATION {
     MDS_ENCODE_RACES(
         pop_info,
         HAMONIZE_HAPMAP_VARIANT.out
+    )
+
+    mds_plot_script = channel.fromPath("${projectDir}/2_Population_stratification/MDS_merged.R")
+    MDS_PLOTTING(
+        mds_plot_script,
+        MDS_PRUNE_SNPS.out.mds,
+        MDS_ENCODE_RACES.out
     )
 
 }
