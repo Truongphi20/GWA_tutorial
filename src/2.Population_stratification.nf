@@ -214,18 +214,20 @@ process MERGE_ENSURE_HAPMAP_REF {
 
 process MERGE_STRAND_PB_CHECK {
 
+    container "community.wave.seqera.io/library/pip_networkx_pandas:7926d52a5e9ee4bd"
+
     input:
     path okgp_harmonize_build
     path hapmap_ensure_ref
+    path check_strand_script
 
     output:
-    path("all_differences.txt")
+    path("flipping_snps.txt"), emit: flipping
+    path("dropping_snps.txt"), emit: dropping
 
     script:
     """
-    awk '{print\$2,\$5,\$6}' 1kG_MDS7.bim > 1kGMDS7_tmp
-    awk '{print\$2,\$5,\$6}' HapMap-adj.bim > HapMap-adj_tmp
-    sort 1kGMDS7_tmp HapMap-adj_tmp |uniq -u > all_differences.txt
+    python check_strand_pb.py
     """
 } 
 
@@ -233,7 +235,7 @@ process MERGE_STRAND_PB_FLIP {
     container "biocontainers/plink:v1.07dfsg-2-deb_cv1"
 
     input:
-    path strand_check
+    path strand_flipping_check
     path hapmap_ensure_ref
     path hapmap_ensure_ref_list
 
@@ -243,10 +245,9 @@ process MERGE_STRAND_PB_FLIP {
 
     script:
     """
-    awk '{print\$1}' all_differences.txt | sort -u > flip_list.txt
     /usr/lib/debian-med/bin/plink \\
             --bfile HapMap-adj \\
-            --flip flip_list.txt \\
+            --flip flipping_snps.txt \\
             --reference-allele 1kg_ref-list.txt \\
             --make-bed \\
             --out corrected_hapmap
@@ -262,6 +263,7 @@ process MERGE_DROP_VARIANTS {
     input:
     path corrected_hapmap
     path okgp_harmonize_build
+    path check_strand_dropping
 
     output:
     path("HapMap_MDS2.{bed,bim,fam}")       , emit: hapmap 
@@ -270,6 +272,8 @@ process MERGE_DROP_VARIANTS {
     script:
     """
     awk '{print\$1}' uncorresponding_SNPs.txt | sort -u > SNPs_for_exlusion.txt
+    cat dropping_snps.txt >> SNPs_for_exlusion.txt
+
     plink2 --bfile corrected_hapmap \\
            --exclude SNPs_for_exlusion.txt \\
            --make-bed \\
@@ -342,20 +346,23 @@ workflow POP_STRATIFICATION {
         HAMONIZE_HAPMAP_VARIANT.out
     )
 
+    check_strand_script = channel.fromPath("${projectDir}/survey/merge_hapmap_and_okgp/check_strand_pb.py")
     MERGE_STRAND_PB_CHECK(
         HAMONIZE_OKGP_BUILD.out,
-        MERGE_ENSURE_HAPMAP_REF.out.bfiles
+        MERGE_ENSURE_HAPMAP_REF.out.bfiles,
+        check_strand_script
     )
 
     MERGE_STRAND_PB_FLIP(
-        MERGE_STRAND_PB_CHECK.out,
+        MERGE_STRAND_PB_CHECK.out.flipping,
         MERGE_ENSURE_HAPMAP_REF.out.bfiles,
         MERGE_ENSURE_HAPMAP_REF.out.ref_list
     )
 
     MERGE_DROP_VARIANTS(
         MERGE_STRAND_PB_FLIP.out.bfiles,
-        HAMONIZE_OKGP_BUILD.out
+        HAMONIZE_OKGP_BUILD.out,
+        MERGE_STRAND_PB_CHECK.out.dropping
     )
 
     MERGE_HAPMAP_AND_OKGP(
