@@ -337,9 +337,10 @@ process MDS_PRUNE_SNPS {
 process MDS_ENCODE_RACES {
     input:
     path pop_info
+    path merge_bfile
 
     output:
-    path("race_1kG14.txt")
+    path("racefile.txt")
 
     script:
     """
@@ -357,6 +358,12 @@ process MDS_ENCODE_RACES {
     sed 's/FIN/EUR/g' race_1kG11.txt>race_1kG12.txt
     sed 's/CHS/ASN/g' race_1kG12.txt>race_1kG13.txt
     sed 's/PUR/AMR/g' race_1kG13.txt>race_1kG14.txt
+
+    # Create a racefile of your own data.
+    awk '{print\$1,\$2,"OWN"}' HapMap_MDS.fam>racefile_own.txt
+
+    # Concatenate racefiles.
+    cat race_1kG14.txt racefile_own.txt | sed -e '1i\\FID IID race' > racefile.txt
     """
 }
 
@@ -430,6 +437,9 @@ workflow POP_STRATIFICATION {
     )
 
     pop_info = channel.fromPath("${projectDir}/assets/20100804.ALL.panel")
-    MDS_ENCODE_RACES(pop_info)
+    MDS_ENCODE_RACES(
+        pop_info,
+        HAMONIZE_HAPMAP_VARIANT.out
+    )
 
 }
