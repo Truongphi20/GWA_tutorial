@@ -371,6 +371,29 @@ process MDS_PLOTTING {
     """
 }
 
+process FORMATTING_EXCLUDE_OUTLIER_SAMPLES {
+    container "biocontainers/plink:v1.07dfsg-2-deb_cv1"
+
+    input:
+    path merge_mds
+    path general_qc_out
+
+    output:
+    path("HapMap_3_r3_13.{bed,bim,fam}")
+
+    script:
+    """
+    # Select individuals in HapMap data below cut-off thresholds.
+    awk '{ if (\$4 <-0.04 && \$5 >0.03) print \$1,\$2 }' MDS_merge2.mds > EUR_MDS_merge2
+
+    # Extract these individuals in HapMap data
+    /usr/lib/debian-med/bin/plink --bfile HapMap_3_r3_12 \\
+                                  --keep EUR_MDS_merge2 \\
+                                  --make-bed \\
+                                  --out HapMap_3_r3_13
+    """
+}
+
 
 workflow POP_STRATIFICATION {
     take:
@@ -456,4 +479,9 @@ workflow POP_STRATIFICATION {
         MDS_ENCODE_RACES.out
     )
 
+    // Step 5: Remove outliers from mds
+    FORMATTING_EXCLUDE_OUTLIER_SAMPLES(
+        MDS_PRUNE_SNPS.out.mds,
+        general_qc_out
+    )
 }
