@@ -530,4 +530,8 @@ workflow POP_STRATIFICATION {
     )
 
     FORMATTING_CREATE_COVARIATE_FILE(FORMATTING_REGENERATE_MDS.out.mds) 
+
+    emit:
+    associate_bfile = FORMATTING_EXCLUDE_OUTLIER_SAMPLES.out        // HapMap_3_r3_13.{bed,bim,fam}
+    covar_mds       = FORMATTING_CREATE_COVARIATE_FILE.out          // covar_mds.txt
 }
