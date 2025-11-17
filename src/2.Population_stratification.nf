@@ -420,6 +420,19 @@ process FORMATTING_REGENERATE_MDS {
     """
 }
 
+process FORMATTING_CREATE_COVARIATE_FILE {
+    input:
+    path remove_oulier_mds
+
+    output:
+    path("covar_mds.txt")
+
+    script:
+    """
+    awk '{print\$1, \$2, \$4, \$5, \$6, \$7, \$8, \$9, \$10, \$11, \$12, \$13}' HapMap_3_r3_13_mds.mds > covar_mds.txt
+    """ 
+}
+
 
 workflow POP_STRATIFICATION {
     take:
@@ -515,4 +528,6 @@ workflow POP_STRATIFICATION {
         het_prune_check,
         FORMATTING_EXCLUDE_OUTLIER_SAMPLES.out
     )
+
+    FORMATTING_CREATE_COVARIATE_FILE(FORMATTING_REGENERATE_MDS.out.mds) 
 }
