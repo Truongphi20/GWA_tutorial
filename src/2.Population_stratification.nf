@@ -394,6 +394,32 @@ process FORMATTING_EXCLUDE_OUTLIER_SAMPLES {
     """
 }
 
+process FORMATTING_REGENERATE_MDS {
+    container "biocontainers/plink:v1.07dfsg-2-deb_cv1"
+
+    input:
+    path het_prune_check
+    path remove_oulier_bfiles
+
+    output:
+    path("HapMap_3_r3_13.genome"),     emit: genome
+    path("HapMap_3_r3_13_mds.mds"),    emit: mds
+
+    script:
+    """
+    /usr/lib/debian-med/bin/plink --bfile HapMap_3_r3_13 \\
+                                  --extract indepSNP.prune.in \\
+                                  --genome \\
+                                  --out HapMap_3_r3_13
+    
+    /usr/lib/debian-med/bin/plink --bfile HapMap_3_r3_13 \\
+                                  --read-genome HapMap_3_r3_13.genome \\
+                                  --cluster \\
+                                  --mds-plot 10 \\
+                                  --out HapMap_3_r3_13_mds
+    """
+}
+
 
 workflow POP_STRATIFICATION {
     take:
@@ -483,5 +509,10 @@ workflow POP_STRATIFICATION {
     FORMATTING_EXCLUDE_OUTLIER_SAMPLES(
         MDS_PRUNE_SNPS.out.mds,
         general_qc_out
+    )
+
+    FORMATTING_REGENERATE_MDS(
+        het_prune_check,
+        FORMATTING_EXCLUDE_OUTLIER_SAMPLES.out
     )
 }
