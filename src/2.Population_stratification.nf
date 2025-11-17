@@ -336,35 +336,21 @@ process MDS_PRUNE_SNPS {
 }
 
 process MDS_ENCODE_RACES {
+
+    container "community.wave.seqera.io/library/pip_networkx_pandas:7926d52a5e9ee4bd"
+
     input:
     path pop_info
     path merge_bfile
+    path mds_encode_script
+    path merge_mds
 
     output:
     path("racefile.txt")
 
     script:
     """
-    awk '{print\$1,\$1,\$2}' 20100804.ALL.panel > race_1kG.txt
-    sed 's/JPT/ASN/g' race_1kG.txt>race_1kG2.txt
-    sed 's/ASW/AFR/g' race_1kG2.txt>race_1kG3.txt
-    sed 's/CEU/EUR/g' race_1kG3.txt>race_1kG4.txt
-    sed 's/CHB/ASN/g' race_1kG4.txt>race_1kG5.txt
-    sed 's/CHD/ASN/g' race_1kG5.txt>race_1kG6.txt
-    sed 's/YRI/AFR/g' race_1kG6.txt>race_1kG7.txt
-    sed 's/LWK/AFR/g' race_1kG7.txt>race_1kG8.txt
-    sed 's/TSI/EUR/g' race_1kG8.txt>race_1kG9.txt
-    sed 's/MXL/AMR/g' race_1kG9.txt>race_1kG10.txt
-    sed 's/GBR/EUR/g' race_1kG10.txt>race_1kG11.txt
-    sed 's/FIN/EUR/g' race_1kG11.txt>race_1kG12.txt
-    sed 's/CHS/ASN/g' race_1kG12.txt>race_1kG13.txt
-    sed 's/PUR/AMR/g' race_1kG13.txt>race_1kG14.txt
-
-    # Create a racefile of your own data.
-    awk '{print\$1,\$2,"OWN"}' HapMap_MDS.fam>racefile_own.txt
-
-    # Concatenate racefiles.
-    cat race_1kG14.txt racefile_own.txt | sed -e '1i\\FID IID race' > racefile.txt
+    python mds_encode.py
     """
 }
 
@@ -455,9 +441,12 @@ workflow POP_STRATIFICATION {
     )
 
     pop_info = channel.fromPath("${projectDir}/assets/20100804.ALL.panel")
+    mds_encode_script = channel.fromPath("${projectDir}/survey/mds_plot/mds_encode.py")
     MDS_ENCODE_RACES(
         pop_info,
-        HAMONIZE_HAPMAP_VARIANT.out
+        HAMONIZE_HAPMAP_VARIANT.out,
+        mds_encode_script,
+        MDS_PRUNE_SNPS.out.mds
     )
 
     mds_plot_script = channel.fromPath("${projectDir}/2_Population_stratification/MDS_merged.R")
