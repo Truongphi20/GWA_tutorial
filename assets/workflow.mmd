@@ -1,122 +1,198 @@
 flowchart TB
     subgraph " "
     v0["Channel.fromPath"]
-    v4["Channel.fromPath"]
-    v13["Channel.fromPath"]
-    v23["Channel.fromPath"]
-    v28["Channel.fromPath"]
-    v34["Channel.fromPath"]
-    v36["Channel.fromPath"]
+    v2["Channel.fromPath"]
+    v5["Channel.fromPath"]
+    v14["Channel.fromPath"]
+    v24["Channel.fromPath"]
+    v29["Channel.fromPath"]
+    v35["Channel.fromPath"]
     v37["Channel.fromPath"]
-    v42["Channel.fromPath"]
-    v51["Channel.fromPath"]
+    v38["Channel.fromPath"]
+    v43["Channel.fromPath"]
+    v52["Channel.fromPath"]
+    v66["Channel.fromPath"]
+    v75["Channel.fromPath"]
+    v76["Channel.fromPath"]
+    v78["Channel.fromPath"]
     end
     subgraph "QC_GWAS [QC_GWAS]"
-    v2(["INVESTIGATE_MISSINGNESS"])
-    v5(["VISUALIZE_MISSINGNESS"])
-    v8(["FILTERING_MISSINGNESS"])
-    v12(["CHECK_SEX_DISCREPANCY"])
-    v14(["SEX_DISCREPANCY_VISUALIZE"])
-    v18(["SEX_DISCREPANCY_HANDLE_BY_REMOVE"])
-    v20(["SEX_DISCREPANCY_HANDLE_BY_IMPUTE"])
-    v21(["MAF_AUTOSOMAL_SELECTION"])
-    v24(["MAF_PLOT_DISTRIBUTION"])
-    v26(["MAF_FILTERING"])
-    v27(["HWE_CHECKING"])
-    v29(["HWE_CHECKING_PLOT"])
-    v32(["HWE_HANDLE_CONTROL"])
-    v33(["HWE_HANDLE_CASES"])
-    v35(["HETEROZYGOSITY_CHECK"])
-    v38(["HETEROZYGOSITY_PLOT_DISTRIBUTION"])
-    v40(["HETEROZYGOSITY_DROP_FAILED_SAMPLES"])
-    v41(["RELATEDNESS_CHECK"])
-    v43(["RELATEDNESS_PLOT_RELATIONSHIP"])
-    v47(["RELATEDNESS_FILTER_FOUNDERS"])
-    v48(["RELATEDNESS_FOUNDERS_CHECK"])
-    v50(["RELATEDNESS_MISSING_CHECK"])
-    v52(["RELATEDNESS_GET_DROPPED_SAMPLES_LIST"])
-    v53(["RELATEDNESS_DELETE_RELATED_SAMPLES"])
+    v3(["INVESTIGATE_MISSINGNESS"])
+    v6(["VISUALIZE_MISSINGNESS"])
+    v9(["FILTERING_MISSINGNESS"])
+    v13(["CHECK_SEX_DISCREPANCY"])
+    v15(["SEX_DISCREPANCY_VISUALIZE"])
+    v19(["SEX_DISCREPANCY_HANDLE_BY_REMOVE"])
+    v21(["SEX_DISCREPANCY_HANDLE_BY_IMPUTE"])
+    v22(["MAF_AUTOSOMAL_SELECTION"])
+    v25(["MAF_PLOT_DISTRIBUTION"])
+    v27(["MAF_FILTERING"])
+    v28(["HWE_CHECKING"])
+    v30(["HWE_CHECKING_PLOT"])
+    v33(["HWE_HANDLE_CONTROL"])
+    v34(["HWE_HANDLE_CASES"])
+    v36(["HETEROZYGOSITY_CHECK"])
+    v39(["HETEROZYGOSITY_PLOT_DISTRIBUTION"])
+    v41(["HETEROZYGOSITY_DROP_FAILED_SAMPLES"])
+    v42(["RELATEDNESS_CHECK"])
+    v44(["RELATEDNESS_PLOT_RELATIONSHIP"])
+    v48(["RELATEDNESS_FILTER_FOUNDERS"])
+    v49(["RELATEDNESS_FOUNDERS_CHECK"])
+    v51(["RELATEDNESS_MISSING_CHECK"])
+    v53(["RELATEDNESS_GET_DROPPED_SAMPLES_LIST"])
+    v54(["RELATEDNESS_DELETE_RELATED_SAMPLES"])
     end
     subgraph " "
-    v3[" "]
-    v6[" "]
+    v4[" "]
     v7[" "]
-    v9[" "]
+    v8[" "]
     v10[" "]
     v11[" "]
-    v15[" "]
+    v12[" "]
     v16[" "]
     v17[" "]
-    v19[" "]
-    v22[" "]
-    v25[" "]
-    v30[" "]
+    v18[" "]
+    v20[" "]
+    v23[" "]
+    v26[" "]
     v31[" "]
-    v39[" "]
-    v44[" "]
+    v32[" "]
+    v40[" "]
     v45[" "]
     v46[" "]
-    v49[" "]
-    v54[" "]
+    v47[" "]
+    v50[" "]
+    v69[" "]
+    v73[" "]
+    v74[" "]
+    v80[" "]
+    v83[" "]
+    v85[" "]
+    end
+    subgraph "POP_STRATIFICATION [POP_STRATIFICATION]"
+    v55(["OKGP_CONVERT_BFILE"])
+    v56(["OKGP_FILL_MISSING_RSID"])
+    v57(["OKGP_QC_DROP_VARIANTS"])
+    v58(["OKGP_QC_DROP_INDIVIDUALS"])
+    v59(["OKGP_QC_STRICTHEN_DROP_VARIANTS"])
+    v60(["OKGP_QC_STRICTHEN_DROP_INDIVIDUALS"])
+    v61(["OKGP_QC_MAF"])
+    v62(["HAMONIZE_OKGP_VARIANT"])
+    v63(["HAMONIZE_HAPMAP_VARIANT"])
+    v64(["HAMONIZE_OKGP_BUILD"])
+    v65(["MERGE_ENSURE_HAPMAP_REF"])
+    v67(["MERGE_STRAND_PB_CHECK"])
+    v68(["MERGE_STRAND_PB_FLIP"])
+    v70(["MERGE_DROP_VARIANTS"])
+    v71(["MERGE_HAPMAP_AND_OKGP"])
+    v72(["MDS_PRUNE_SNPS"])
+    v77(["MDS_ENCODE_RACES"])
+    v79(["MDS_PLOTTING"])
+    v81(["FORMATTING_EXCLUDE_OUTLIER_SAMPLES"])
+    v82(["FORMATTING_REGENERATE_MDS"])
+    v84(["FORMATTING_CREATE_COVARIATE_FILE"])
     end
     v1(( ))
     v0 --> v1
-    v1 --> v2
-    v2 --> v5
-    v2 --> v3
-    v4 --> v5
-    v5 --> v7
+    v2 --> v55
+    v1 --> v3
+    v3 --> v6
+    v3 --> v4
     v5 --> v6
-    v1 --> v8
-    v8 --> v11
-    v8 --> v10
-    v8 --> v9
-    v8 --> v12
-    v8 --> v18
-    v8 --> v20
-    v12 --> v14
-    v12 --> v18
-    v13 --> v14
-    v14 --> v17
-    v14 --> v16
+    v6 --> v8
+    v6 --> v7
+    v1 --> v9
+    v9 --> v12
+    v9 --> v11
+    v9 --> v10
+    v9 --> v13
+    v9 --> v19
+    v9 --> v21
+    v13 --> v15
+    v13 --> v19
     v14 --> v15
-    v18 --> v19
-    v20 --> v21
-    v21 --> v26
+    v15 --> v18
+    v15 --> v17
+    v15 --> v16
+    v19 --> v20
     v21 --> v22
-    v21 --> v24
-    v23 --> v24
+    v22 --> v27
+    v22 --> v23
+    v22 --> v25
     v24 --> v25
-    v26 --> v27
-    v26 --> v32
-    v27 --> v29
-    v28 --> v29
-    v29 --> v31
+    v25 --> v26
+    v27 --> v28
+    v27 --> v33
+    v28 --> v30
     v29 --> v30
-    v32 --> v33
-    v33 --> v35
-    v33 --> v40
-    v34 --> v35
-    v35 --> v41
-    v35 --> v38
-    v35 --> v48
-    v36 --> v38
-    v37 --> v38
+    v30 --> v32
+    v30 --> v31
+    v33 --> v34
+    v34 --> v36
+    v34 --> v41
+    v35 --> v36
+    v36 --> v42
+    v36 --> v39
+    v36 --> v49
+    v36 --> v72
+    v36 --> v82
+    v37 --> v39
     v38 --> v39
-    v38 --> v40
-    v40 --> v41
-    v40 --> v47
-    v41 --> v43
-    v41 --> v52
-    v42 --> v43
-    v43 --> v46
-    v43 --> v45
+    v39 --> v40
+    v39 --> v41
+    v41 --> v42
+    v41 --> v48
+    v42 --> v44
+    v42 --> v53
     v43 --> v44
-    v47 --> v48
-    v47 --> v50
-    v47 --> v53
+    v44 --> v47
+    v44 --> v46
+    v44 --> v45
     v48 --> v49
-    v50 --> v52
-    v51 --> v52
+    v48 --> v51
+    v48 --> v54
+    v49 --> v50
+    v51 --> v53
     v52 --> v53
     v53 --> v54
+    v54 --> v62
+    v54 --> v63
+    v54 --> v81
+    v55 --> v56
+    v56 --> v57
+    v57 --> v58
+    v58 --> v59
+    v59 --> v60
+    v60 --> v61
+    v61 --> v62
+    v62 --> v63
+    v62 --> v64
+    v63 --> v64
+    v63 --> v65
+    v63 --> v77
+    v64 --> v65
+    v64 --> v67
+    v64 --> v70
+    v65 --> v67
+    v65 --> v68
+    v66 --> v67
+    v67 --> v68
+    v67 --> v70
+    v68 --> v70
+    v68 --> v69
+    v70 --> v71
+    v71 --> v72
+    v72 --> v74
+    v72 --> v73
+    v72 --> v77
+    v72 --> v79
+    v72 --> v81
+    v75 --> v77
+    v76 --> v77
+    v77 --> v79
+    v78 --> v79
+    v79 --> v80
+    v81 --> v82
+    v82 --> v83
+    v82 --> v84
+    v84 --> v85
