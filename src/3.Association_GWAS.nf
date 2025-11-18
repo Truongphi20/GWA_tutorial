@@ -47,6 +47,23 @@ process ANALYSIS_CLEANUP {
     """
 }
 
+process TESTING_ADJUSTING {
+    container "biocontainers/plink:v1.07dfsg-2-deb_cv1"
+
+    input:
+    path associate_bfile
+
+    output:
+    path("adjusted_assoc_results.assoc")
+
+    script:
+    """
+    /usr/lib/debian-med/bin/plink --bfile HapMap_3_r3_13 \\
+                                  --assoc --adjust \\
+                                  --out adjusted_assoc_results
+    """
+}
+
 
 workflow ASSOCIATION_GWAS {
     take:
@@ -61,6 +78,9 @@ workflow ASSOCIATION_GWAS {
         covar_mds
     )
     ANALYSIS_CLEANUP(ANALYSIS_LOGISTIC.out)
+
+    // Step 2: Testing
+    TESTING_ADJUSTING(associate_bfile)
 
     
 }
