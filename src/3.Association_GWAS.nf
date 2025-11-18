@@ -33,6 +33,20 @@ process ANALYSIS_LOGISTIC {
     """
 }
 
+process ANALYSIS_CLEANUP {
+
+    input:
+    path logistic_output
+
+    output:
+    path("logistic_results.assoc_2.logistic")
+
+    script:
+    """
+    awk '!/'NA'/' logistic_results.assoc.logistic > logistic_results.assoc_2.logistic
+    """
+}
+
 
 workflow ASSOCIATION_GWAS {
     take:
@@ -40,10 +54,13 @@ workflow ASSOCIATION_GWAS {
     covar_mds                       // covar_mds.txt
 
     main:
+    // Step 1: Associate analysis 
     ANALYSIS_ASSOC(associate_bfile)
     ANALYSIS_LOGISTIC(
         associate_bfile,
         covar_mds
     )
+    ANALYSIS_CLEANUP(ANALYSIS_LOGISTIC.out)
+
     
 }
