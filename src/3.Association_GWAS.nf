@@ -77,7 +77,7 @@ process TESTING_PERMUTATION {
     """
     # Generate subset of SNPs
     awk '{ if (\$4 >= 21595000 && \$4 <= 21605000) print \$2 }' HapMap_3_r3_13.bim > subset_snp_chr_22.txt
-    
+
     # Filter your bfile based on the subset of SNPs generated in the step above.
     /usr/lib/debian-med/bin/plink --bfile HapMap_3_r3_13 \\
                                   --extract subset_snp_chr_22.txt \\
@@ -92,6 +92,23 @@ process TESTING_PERMUTATION {
 
     # Order your data, from lowest to highest p-value.
     sort -gk 4 subset_1M_perm_result.assoc.mperm > sorted_subset.txt
+    """
+}
+
+process PLOTTING_MANHATTAN {
+    container "sickleinafrica/r-qqman:latest"
+
+    input:
+    path clean_logistic_output
+    path assoc_results
+    path manhattan_plot_script
+
+    output:
+    path("assoc_manhattan.jpeg")
+
+    script:
+    """
+    Rscript --no-save Manhattan_plot.R
     """
 }
 
@@ -113,6 +130,14 @@ workflow ASSOCIATION_GWAS {
     // Step 2: Testing
     TESTING_ADJUSTING(associate_bfile)
     TESTING_PERMUTATION(associate_bfile)
+
+    // Step 3: Plotting
+    manhattan_plot_script = channel.fromPath("${projectDir}/3_Association_GWAS/Manhattan_plot.R")
+    PLOTTING_MANHATTAN(
+        ANALYSIS_CLEANUP.out,
+        ANALYSIS_ASSOC.out,
+        manhattan_plot_script
+    )
 
     
 }
