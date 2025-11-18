@@ -13,6 +13,26 @@ process ANALYSIS_ASSOC {
     """
 }
 
+process ANALYSIS_LOGISTIC {
+    container "biocontainers/plink:v1.07dfsg-2-deb_cv1"
+
+    input:
+    path associate_bfile
+    path covar_mds
+
+    output:
+    path("logistic_results.assoc.logistic")
+
+    script:
+    """
+    /usr/lib/debian-med/bin/plink --bfile HapMap_3_r3_13 \\
+                                  --covar covar_mds.txt \\
+                                  --logistic \\
+                                  --hide-covar \\
+                                  --out logistic_results
+    """
+}
+
 
 workflow ASSOCIATION_GWAS {
     take:
@@ -21,5 +41,9 @@ workflow ASSOCIATION_GWAS {
 
     main:
     ANALYSIS_ASSOC(associate_bfile)
+    ANALYSIS_LOGISTIC(
+        associate_bfile,
+        covar_mds
+    )
     
 }
