@@ -15,6 +15,8 @@ flowchart TB
     v75["Channel.fromPath"]
     v76["Channel.fromPath"]
     v78["Channel.fromPath"]
+    v92["Channel.fromPath"]
+    v95["Channel.fromPath"]
     end
     subgraph "QC_GWAS [QC_GWAS]"
     v3(["INVESTIGATE_MISSINGNESS"])
@@ -67,7 +69,11 @@ flowchart TB
     v74[" "]
     v80[" "]
     v83[" "]
-    v85[" "]
+    v89[" "]
+    v91[" "]
+    v94[" "]
+    v97[" "]
+    v98[" "]
     end
     subgraph "POP_STRATIFICATION [POP_STRATIFICATION]"
     v55(["OKGP_CONVERT_BFILE"])
@@ -91,6 +97,15 @@ flowchart TB
     v81(["FORMATTING_EXCLUDE_OUTLIER_SAMPLES"])
     v82(["FORMATTING_REGENERATE_MDS"])
     v84(["FORMATTING_CREATE_COVARIATE_FILE"])
+    end
+    subgraph "ASSOCIATION_GWAS [ASSOCIATION_GWAS]"
+    v85(["ANALYSIS_ASSOC"])
+    v86(["ANALYSIS_LOGISTIC"])
+    v87(["ANALYSIS_CLEANUP"])
+    v88(["TESTING_ADJUSTING"])
+    v90(["TESTING_PERMUTATION"])
+    v93(["PLOTTING_MANHATTAN"])
+    v96(["PLOTTING_QQPLOT"])
     end
     v1(( ))
     v0 --> v1
@@ -193,6 +208,22 @@ flowchart TB
     v78 --> v79
     v79 --> v80
     v81 --> v82
+    v81 --> v85
+    v81 --> v86
+    v81 --> v88
+    v81 --> v90
     v82 --> v83
     v82 --> v84
-    v84 --> v85
+    v84 --> v86
+    v85 --> v93
+    v85 --> v96
+    v86 --> v87
+    v87 --> v93
+    v87 --> v96
+    v88 --> v89
+    v90 --> v91
+    v92 --> v93
+    v93 --> v94
+    v95 --> v96
+    v96 --> v98
+    v96 --> v97
