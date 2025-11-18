@@ -112,6 +112,24 @@ process PLOTTING_MANHATTAN {
     """
 }
 
+process PLOTTING_QQPLOT {
+    container "sickleinafrica/r-qqman:latest"
+
+    input:
+    path assoc_results
+    path clean_logistic_output
+    path qq_plot_script
+
+    output:
+    path("QQ-Plot_logistic.jpeg") ,  emit: logistic
+    path("QQ-Plot_assoc.jpeg") ,     emit: assoc
+
+    script:
+    """
+    Rscript --no-save QQ_plot.R
+    """
+}
+
 
 workflow ASSOCIATION_GWAS {
     take:
@@ -137,6 +155,13 @@ workflow ASSOCIATION_GWAS {
         ANALYSIS_CLEANUP.out,
         ANALYSIS_ASSOC.out,
         manhattan_plot_script
+    )
+
+    qqplot_script = channel.fromPath("${projectDir}/3_Association_GWAS/QQ_plot.R")
+    PLOTTING_QQPLOT(
+        ANALYSIS_CLEANUP.out,
+        ANALYSIS_ASSOC.out,
+        qqplot_script
     )
 
     
