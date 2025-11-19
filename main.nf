@@ -1,6 +1,7 @@
 #!/usr/bin/env nextflow
 include { QC_GWAS            }     from        "./src/1.QC_GWAS.nf" 
 include { POP_STRATIFICATION }     from        "./src/2.Population_stratification"
+include { ASSOCIATION_GWAS   }     from        "./src/3.Association_GWAS.nf"
 
 workflow{
     // Inputs
@@ -13,5 +14,9 @@ workflow{
         okgp_vcf,
         QC_GWAS.out.general_qc_out,
         QC_GWAS.out.het_prune_check
+    )
+    ASSOCIATION_GWAS(
+        POP_STRATIFICATION.out.associate_bfile,
+        POP_STRATIFICATION.out.covar_mds
     )
 }
